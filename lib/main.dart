@@ -3,6 +3,7 @@ import 'package:window_manager/window_manager.dart';
 import 'package:local_reader/task_page.dart';
 import 'package:local_reader/setting_page.dart';
 import 'dart:io';
+import 'package:provider/provider.dart';
 
 void main() async {
   // 窗口初始化
