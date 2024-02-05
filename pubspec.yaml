@@ -33,6 +33,7 @@ dependencies:
   webdriver: ^3.0.3
   window_manager: ^0.3.8
   provider: ^6.1.1
+  webview_flutter: ^4.5.0
 
 dev_dependencies:
   flutter_test:
@@ -58,6 +59,10 @@ flutter:
   # To add assets to your application, add an assets section, like this:
   assets:
     - assets/github-mark.png
+    - lib/scripts/book_info_analyst.js
+    - lib/scripts/catalogue_analyst.js
+    - lib/scripts/article_analyst.js
+
   #   - images/a_dot_ham.jpeg
 
   # An image asset can refer to one or more resolution-specific "variants", see

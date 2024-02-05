@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:window_manager/window_manager.dart';
 import 'package:local_reader/task_page.dart';
 import 'package:local_reader/setting_page.dart';
+import 'package:local_reader/grab_helper.dart';
 import 'dart:io';
-import 'package:provider/provider.dart';
 
 void main() async {
   // 窗口初始化
@@ -21,28 +21,6 @@ void main() async {
     await windowManager.setAlignment(Alignment.center);
   });
   runApp(const MyApp());
-  /*
-import 'package:webdriver/sync_io.dart';
-
-  final WebDriver driver = createDriver(
-      uri: Uri.parse('http://localhost:4444/wd/hub/'),
-      desired: {
-        'browserName': 'msedge',
-        'ms:edgeOptions': {
-          'binary':
-              r"C:\Program Files (x86)\Microsoft\Edge\Application\msedge.exe"
-        }
-      },
-      spec: WebDriverSpec.Auto);
-  driver.get('https://m.mayiwsk.com/59_59856/');
-
-  driver.timeouts.setScriptTimeout(const Duration(days: 7));
-
-  final result = driver.execute('''
-    return "Hello, World!";
-  ''', []);
-
-  print(result);*/
 }
 
 bool get isDesktop {
