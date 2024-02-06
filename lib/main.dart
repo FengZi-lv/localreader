@@ -1,9 +1,17 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:window_manager/window_manager.dart';
 import 'package:local_reader/task_page.dart';
 import 'package:local_reader/setting_page.dart';
-import 'package:local_reader/grab_helper.dart';
+import 'package:local_reader/grab_tasks.dart';
+import 'package:local_reader/add_task_page.dart';
 import 'dart:io';
+
+const Map<String, String> desktopWebDriverInfo = {
+  'desktopBrowserName': 'msedge',
+  'desktopBrowserPath':
+      r"C:\Program Files (x86)\Microsoft\Edge\Application\msedge.exe"
+};
 
 void main() async {
   // 窗口初始化
@@ -20,12 +28,18 @@ void main() async {
   windowManager.waitUntilReadyToShow(windowOptions, () async {
     await windowManager.setAlignment(Alignment.center);
   });
-  runApp(const MyApp());
+
+  Provider.debugCheckInvalidValueType = null;
+
+  runApp(Provider(
+      create: (_) => GrabTasksHelper(
+            desktopBrowserName: desktopWebDriverInfo['desktopBrowserName'],
+            desktopBrowserPath: desktopWebDriverInfo['desktopBrowserPath'],
+          ),
+      child: const MyApp()));
 }
 
-bool get isDesktop {
-  return Platform.isWindows || Platform.isMacOS || Platform.isLinux;
-}
+bool isDesktop = Platform.isWindows || Platform.isMacOS || Platform.isLinux;
 
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
@@ -44,7 +58,6 @@ class MyApp extends StatelessWidget {
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
-
   @override
   State<HomePage> createState() => _HomePageState();
 }
@@ -53,7 +66,13 @@ int taskCount = 0;
 
 class _HomePageState extends State<HomePage> {
   int _selectedIndex = 0;
-  final TextEditingController _textEditingController = TextEditingController();
+
+  @override
+  void initState() {
+    super.initState();
+    print('init');
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -68,66 +87,7 @@ class _HomePageState extends State<HomePage> {
               });
             },
             labelType: NavigationRailLabelType.all,
-            leading: FloatingActionButton(
-              elevation: 0,
-              onPressed: () {
-                showDialog<void>(
-                  context: context,
-                  barrierDismissible: false, // user must tap button!
-                  builder: (BuildContext context) {
-                    return AlertDialog(
-                      title: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          const Text('添加图书'),
-                          IconButton(
-                              onPressed: () {},
-                              icon: const Icon(Icons.help_outline_rounded))
-                        ],
-                      ),
-                      content: SingleChildScrollView(
-                        child: ListBody(
-                          children: <Widget>[
-                            TextField(
-                              controller: _textEditingController,
-                              autofocus: true,
-                              obscureText: true,
-                              decoration: const InputDecoration(
-                                border: OutlineInputBorder(),
-                                labelText: '图书链接',
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                      actions: <Widget>[
-                        TextButton(
-                          child: const Text('取消'),
-                          onPressed: () {
-                            Navigator.of(context).pop();
-                          },
-                        ),
-                        FilledButton(
-                          child: const Text('获取'),
-                          onPressed: () {
-                            taskCount++;
-                            Navigator.of(context).pop();
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              const SnackBar(
-                                content: Text('任务已添加'),
-                                behavior: SnackBarBehavior.floating,
-                              ),
-                            );
-                          },
-                        ),
-                      ],
-                    );
-                  },
-                );
-              },
-              child: const Icon(Icons.add),
-            ),
-            // trailing:
+            leading: const AddBookButton(),
             destinations: <NavigationRailDestination>[
               const NavigationRailDestination(
                 icon: Icon(Icons.book_outlined),

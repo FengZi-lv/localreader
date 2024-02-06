@@ -40,22 +40,18 @@ class MobileWebDriver extends StatelessWidget {
 ///    print(element);
 ///  });
 /// ```
-class GrabHelper extends ChangeNotifier {
+class GrabHelper {
   late WebDriver desktopDriver;
   // WebViewController mobileController = WebViewController();
 
-  String desktopBrowserName;
-  String desktopBrowserPath;
-  String desktopWebDriverPath;
+  String? desktopBrowserName;
+  String? desktopBrowserPath;
 
   late String bookInfoScript;
   late String catalogueScript;
   late String articleScript;
 
-  GrabHelper(
-      {this.desktopBrowserName = '',
-      this.desktopBrowserPath = '',
-      this.desktopWebDriverPath = ''});
+  GrabHelper({this.desktopBrowserName = '', this.desktopBrowserPath = ''});
 
   Future<void> init() async {
     if (isDesktop) {
@@ -113,9 +109,6 @@ class GrabHelper extends ChangeNotifier {
     return result;
   }
 
-  // 此调用告诉正在侦听此模型的小部件进行重建。
-  // notifyListeners();
-
   /// 获取目录
   Future<Map> grabCatalogue(url) async => runScript(url, catalogueScript);
 
@@ -127,19 +120,44 @@ class GrabHelper extends ChangeNotifier {
 
   /// 根据目录获取目录内所有文章
   Stream<Map> grabArticleByCatalogue(Map catalogue) async* {
-    // catalogue: Map<String,List<String>>
+    List failedTask = [];
+
     for (var item in catalogue.keys) {
+      Map result = {};
+      int successCount = 0;
       for (var url in catalogue[item]) {
-        Map result = {};
         try {
           result = runScript(url, articleScript);
+          if (result.isNotEmpty) break;
         } catch (e) {
           print(e);
           continue;
         }
-        yield {'chapter': item, 'result': result['article']};
-        break;
       }
+      if (result.isEmpty) {
+        failedTask.add({'$item': catalogue[item]});
+        yield {
+          'success': false,
+          'chapter': item,
+          'successCount': successCount,
+          'failedTask': failedTask,
+        };
+      } else {
+        yield {
+          'success': true,
+          'chapter': item,
+          'result': result['article'],
+          'successCount': ++successCount,
+          'failedTask': failedTask,
+        };
+      }
+    }
+  }
+
+  /// 销毁
+  Future<void> dispose() async {
+    if (isDesktop) {
+      desktopDriver.quit();
     }
   }
 }

@@ -34,6 +34,10 @@ dependencies:
   window_manager: ^0.3.8
   provider: ^6.1.1
   webview_flutter: ^4.5.0
+  modal_bottom_sheet: ^3.0.0-pre
+  uuid: ^4.3.3
+  path_provider: ^2.1.2
+  path: ^1.8.3
 
 dev_dependencies:
   flutter_test:
@@ -44,7 +48,7 @@ dev_dependencies:
   # activated in the `analysis_options.yaml` file located at the root of your
   # package. See that file for information about deactivating specific lint
   # rules and activating additional ones.
-  flutter_lints: ^2.0.0
+  flutter_lints: ^3.0.1
 
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec
