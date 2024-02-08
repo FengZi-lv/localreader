@@ -6,9 +6,21 @@ import 'package:path/path.dart' as path;
 class FileUtil {
   static Future<Directory> appDocPath = getApplicationDocumentsDirectory();
 
+  static String mainDir = 'LocalReader/';
+
+  static Future<void> createMainDir(String pathSegment) async {
+    String fullPath = path.join((await appDocPath).path, mainDir, pathSegment);
+    Directory dir = Directory(fullPath);
+    if (await dir.exists()) {
+      return;
+    }
+    await dir.create();
+  }
+
   /// 创建文件夹
   static Future<void> createDir(String pathSegment) async {
-    String fullPath = path.join((await appDocPath).path, pathSegment);
+    createMainDir(mainDir);
+    String fullPath = path.join((await appDocPath).path, mainDir, pathSegment);
     Directory dir = Directory(fullPath);
     if (await dir.exists()) {
       return;
@@ -18,7 +30,8 @@ class FileUtil {
 
   /// 删除文件夹
   static Future<void> deleteDir(String pathSegment) async {
-    String fullPath = path.join((await appDocPath).path, pathSegment);
+    createMainDir(mainDir);
+    String fullPath = path.join((await appDocPath).path, mainDir, pathSegment);
     Directory dir = Directory(fullPath);
     if (await dir.exists()) {
       await dir.delete(recursive: true);
@@ -27,7 +40,8 @@ class FileUtil {
 
   /// 写入文件，如果文件不存在则创建
   static Future<void> writeFile(String pathSegment, String content) async {
-    String fullPath = path.join((await appDocPath).path, pathSegment);
+    createMainDir(mainDir);
+    String fullPath = path.join((await appDocPath).path, mainDir, pathSegment);
     File file = File(fullPath);
     if (!await file.exists()) {
       await file.create();
@@ -37,7 +51,7 @@ class FileUtil {
 
   /// 读取文件
   static Future<String> readFile(String pathSegment) async {
-    String fullPath = path.join((await appDocPath).path, pathSegment);
+    String fullPath = path.join((await appDocPath).path, mainDir, pathSegment);
     File file = File(fullPath);
     if (!await file.exists()) {
       writeFile(pathSegment, '');
@@ -59,7 +73,7 @@ class FileUtil {
 
   /// 删除文件
   static Future<void> deleteFile(String pathSegment) async {
-    String fullPath = path.join((await appDocPath).path, pathSegment);
+    String fullPath = path.join((await appDocPath).path, mainDir, pathSegment);
     File file = File(fullPath);
     if (await file.exists()) {
       await file.delete();
