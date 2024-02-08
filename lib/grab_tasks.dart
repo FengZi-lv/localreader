@@ -1,4 +1,4 @@
-import 'package:flutter/foundation.dart' show ChangeNotifier;
+import 'package:flutter/foundation.dart' show ChangeNotifier, compute;
 import 'package:local_reader/file_util.dart';
 import 'package:local_reader/grab_helper.dart';
 import 'package:uuid/uuid.dart';
@@ -53,9 +53,9 @@ class GrabTasksHelper extends ChangeNotifier {
   ///      'bookCover': 'bookCoverURL',
   /// }
   /// ```
-  Future<void> addCatalogueTask(Map bookInfo) async {
-    final taskId = Uuid().v1();
-    await FileUtil.createDir(bookInfo['bookName']);
+  Future<void> addCatalogueTask(List args) async {
+    final taskId = const Uuid().v1();
+    await FileUtil.createDir(args[0]['bookName']);
     /*
     bookInfo['bookCatalogue'] = bookInfo['bookCatalogue'].map((title, url) {
       return {
@@ -67,22 +67,19 @@ class GrabTasksHelper extends ChangeNotifier {
       };
     });
     */
-    final grabHelper = GrabHelper(
-      desktopBrowserName: desktopBrowserName,
-      desktopBrowserPath: desktopBrowserPath,
-    );
+
     tasks[taskId] = {
       'status': 'working',
       'success': 0,
       'fail': 0,
       'total': 0,
-      'bookInfo': bookInfo
+      'bookInfo': args[0]
     };
     notifyListeners();
 
-    await grabHelper.init();
-    Map result = await grabHelper.grabCatalogue(bookInfo['bookMainURL']);
-    grabHelper.dispose();
+    await args[1].init();
+    Map result = await args[1].grabCatalogue(args[0]['bookMainURL']);
+    args[1].dispose();
 
     tasks[taskId]?['status'] = 'done';
     tasks[taskId]?['total'] = result.length;
@@ -94,6 +91,16 @@ class GrabTasksHelper extends ChangeNotifier {
               'localPath': ''
             }));
     print(tasks);
+  }
+
+  /// 异步添加目录任务
+  Future<void> addCatalogueTaskAsync(Map bookInfo) async {
+    final grabHelper = GrabHelper(
+      desktopBrowserName: desktopBrowserName,
+      desktopBrowserPath: desktopBrowserPath,
+    );
+    await grabHelper.initScript();
+    compute(addCatalogueTask, [bookInfo, grabHelper]);
   }
 
   Future<void> addChapterTask(String taskId) async {}

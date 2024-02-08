@@ -65,6 +65,10 @@ class GrabHelper {
           },
           spec: WebDriverSpec.Auto);
     }
+  }
+
+  /// 因为flutter的isolate不支持平台通道，所有需要分开初始化脚本
+  Future<void> initScript() async {
     bookInfoScript =
         await rootBundle.loadString('lib/scripts/book_info_analyst.js');
     catalogueScript =

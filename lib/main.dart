@@ -1,3 +1,5 @@
+import 'dart:isolate';
+
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:window_manager/window_manager.dart';
@@ -31,12 +33,16 @@ void main() async {
 
   Provider.debugCheckInvalidValueType = null;
 
-  runApp(Provider(
-      create: (_) => GrabTasksHelper(
-            desktopBrowserName: desktopWebDriverInfo['desktopBrowserName'],
-            desktopBrowserPath: desktopWebDriverInfo['desktopBrowserPath'],
-          ),
-      child: const MyApp()));
+  runApp(MultiProvider(
+    providers: [
+      Provider<GrabTasksHelper>(
+          create: (_) => GrabTasksHelper(
+                desktopBrowserName: desktopWebDriverInfo['desktopBrowserName'],
+                desktopBrowserPath: desktopWebDriverInfo['desktopBrowserPath'],
+              )),
+    ],
+    child: const MyApp(),
+  ));
 }
 
 bool isDesktop = Platform.isWindows || Platform.isMacOS || Platform.isLinux;

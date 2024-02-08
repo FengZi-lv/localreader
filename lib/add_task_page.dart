@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:local_reader/grab_helper.dart';
 import 'package:local_reader/grab_tasks.dart';
@@ -104,6 +105,11 @@ class _AddBookPageState extends State<AddBookPage> {
   String selectedCover = '';
 
   @override
+  void initState() {
+    super.initState();
+  }
+
+  @override
   Widget build(BuildContext context) {
     final GrabTasksHelper grabTasksHelper =
         Provider.of<GrabTasksHelper>(context, listen: false);
@@ -145,20 +151,12 @@ class _AddBookPageState extends State<AddBookPage> {
                         return;
                       }
                       setState(() => isWorking = true);
-
-                      final grabHelper = GrabHelper(
-                        desktopBrowserName:
-                            desktopWebDriverInfo['desktopBrowserName'],
-                        desktopBrowserPath:
-                            desktopWebDriverInfo['desktopBrowserPath'],
-                      );
-                      await grabHelper.init();
-                      bookInfo = await grabHelper
-                          .grabBookInfo(_textEditingController.text);
-                      grabHelper.dispose();
-                      print(bookInfo);
+                      bookInfo =
+                          await grabBookInfo(_textEditingController.text);
                       selectedCover = bookInfo['bookCover']?.last;
                       setState(() {});
+
+                      print(bookInfo);
                     },
               label: const Text('获取')),
         ),
@@ -229,7 +227,14 @@ class _AddBookPageState extends State<AddBookPage> {
             FilledButton(
               onPressed: () {
                 bookInfo['bookCover'] = selectedCover;
-                grabTasksHelper.addCatalogueTask(bookInfo);
+                grabTasksHelper.addCatalogueTaskAsync(bookInfo);
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(
+                    content: Text('任务已添加'),
+                    behavior: SnackBarBehavior.floating,
+                  ),
+                );
+                print('done');
                 Navigator.of(context).pop();
               },
               child: const Text('添加'),
@@ -399,4 +404,19 @@ class SlideTransitionX extends AnimatedWidget {
       child: child,
     );
   }
+}
+
+Future<Map> grabBookInfo(String url) async {
+  final grabHelper = GrabHelper(
+    desktopBrowserName: 'msedge',
+    desktopBrowserPath:
+        r"C:\Program Files (x86)\Microsoft\Edge\Application\msedge.exe",
+  );
+  await grabHelper.initScript();
+  return await compute((String url) async {
+    await grabHelper.init();
+    final bookInfo = await grabHelper.grabBookInfo(url);
+    grabHelper.dispose();
+    return bookInfo;
+  }, url);
 }
